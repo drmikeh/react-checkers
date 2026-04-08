@@ -1,110 +1,26 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { Board as BoardType, Move, Position, GameStatus } from './types';
-import {
-  createInitialBoard,
-  getValidMovesForPiece,
-  applyMove,
-  getGameStatus,
-  countPieces,
-} from './gameLogic';
+import { useReducer, useEffect } from 'react';
+import { countPieces } from './gameLogic';
 import { getBestMove } from './ai';
+import { gameReducer, initialState } from './reducer';
 import { Board } from './components/Board';
 import './App.css';
 
-interface Snapshot {
-  board: BoardType;
-  gameStatus: GameStatus;
-}
-
 export default function App() {
-  const [board, setBoard] = useState<BoardType>(createInitialBoard);
-  const [selectedPos, setSelectedPos] = useState<Position | null>(null);
-  const [validMoves, setValidMoves] = useState<Move[]>([]);
-  const [currentPlayer, setCurrentPlayer] = useState<'red' | 'black'>('red');
-  const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
-  const [isThinking, setIsThinking] = useState(false);
-  const [history, setHistory] = useState<Snapshot[]>([]);
-
-  const handleSquareClick = useCallback(
-    (pos: Position) => {
-      if (gameStatus !== 'playing' || currentPlayer !== 'red' || isThinking) return;
-
-      const piece = board[pos.row][pos.col];
-
-      const move = validMoves.find(m => m.to.row === pos.row && m.to.col === pos.col);
-      if (move) {
-        setHistory(h => [...h, { board, gameStatus }]);
-        const newBoard = applyMove(board, move);
-        const newStatus = getGameStatus(newBoard);
-        setBoard(newBoard);
-        setSelectedPos(null);
-        setValidMoves([]);
-        setGameStatus(newStatus);
-        if (newStatus === 'playing') setCurrentPlayer('black');
-        return;
-      }
-
-      if (piece?.player === 'red') {
-        const moves = getValidMovesForPiece(board, pos);
-        if (moves.length > 0) {
-          setSelectedPos(pos);
-          setValidMoves(moves);
-        } else {
-          setSelectedPos(null);
-          setValidMoves([]);
-        }
-        return;
-      }
-
-      setSelectedPos(null);
-      setValidMoves([]);
-    },
-    [board, validMoves, gameStatus, currentPlayer, isThinking]
-  );
+  const [state, dispatch] = useReducer(gameReducer, initialState);
+  const { board, selectedPos, validMoves, currentPlayer, gameStatus, isThinking, history } = state;
 
   useEffect(() => {
     if (gameStatus !== 'playing' || currentPlayer !== 'black') return;
 
-    setIsThinking(true);
+    dispatch({ type: 'AI_START_THINKING' });
 
     const timer = setTimeout(() => {
       const bestMove = getBestMove(board, 5);
-      if (bestMove) {
-        const newBoard = applyMove(board, bestMove);
-        const newStatus = getGameStatus(newBoard);
-        setBoard(newBoard);
-        setGameStatus(newStatus);
-        if (newStatus === 'playing') setCurrentPlayer('red');
-      }
-      setIsThinking(false);
+      if (bestMove) dispatch({ type: 'AI_MOVE', move: bestMove });
     }, 400);
 
     return () => clearTimeout(timer);
   }, [currentPlayer, gameStatus, board]);
-
-  const handleUndo = () => {
-    setHistory(h => {
-      const prev = h[h.length - 1];
-      if (!prev) return h;
-      setBoard(prev.board);
-      setGameStatus(prev.gameStatus);
-      setCurrentPlayer('red');
-      setSelectedPos(null);
-      setValidMoves([]);
-      setIsThinking(false);
-      return h.slice(0, -1);
-    });
-  };
-
-  const handleRestart = () => {
-    setBoard(createInitialBoard());
-    setSelectedPos(null);
-    setValidMoves([]);
-    setCurrentPlayer('red');
-    setGameStatus('playing');
-    setIsThinking(false);
-    setHistory([]);
-  };
 
   const pieces = countPieces(board);
 
@@ -140,7 +56,7 @@ export default function App() {
         board={board}
         selectedPos={selectedPos}
         validMoves={validMoves}
-        onSquareClick={handleSquareClick}
+        onSquareClick={pos => dispatch({ type: 'SQUARE_CLICK', pos })}
         disabled={gameStatus !== 'playing' || currentPlayer !== 'red' || isThinking}
       />
 
@@ -153,12 +69,12 @@ export default function App() {
       <div className="action-buttons">
         <button
           className="undo-btn"
-          onClick={handleUndo}
+          onClick={() => dispatch({ type: 'UNDO' })}
           disabled={history.length === 0 || isThinking}
         >
           ↩ Undo
         </button>
-        <button className="restart-btn" onClick={handleRestart}>
+        <button className="restart-btn" onClick={() => dispatch({ type: 'RESTART' })}>
           🔄 New Game
         </button>
       </div>

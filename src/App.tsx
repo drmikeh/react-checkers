@@ -11,6 +11,11 @@ import { getBestMove } from './ai';
 import { Board } from './components/Board';
 import './App.css';
 
+interface Snapshot {
+  board: BoardType;
+  gameStatus: GameStatus;
+}
+
 export default function App() {
   const [board, setBoard] = useState<BoardType>(createInitialBoard);
   const [selectedPos, setSelectedPos] = useState<Position | null>(null);
@@ -18,6 +23,7 @@ export default function App() {
   const [currentPlayer, setCurrentPlayer] = useState<'red' | 'black'>('red');
   const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
   const [isThinking, setIsThinking] = useState(false);
+  const [history, setHistory] = useState<Snapshot[]>([]);
 
   const handleSquareClick = useCallback(
     (pos: Position) => {
@@ -27,6 +33,7 @@ export default function App() {
 
       const move = validMoves.find(m => m.to.row === pos.row && m.to.col === pos.col);
       if (move) {
+        setHistory(h => [...h, { board, gameStatus }]);
         const newBoard = applyMove(board, move);
         const newStatus = getGameStatus(newBoard);
         setBoard(newBoard);
@@ -75,6 +82,20 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [currentPlayer, gameStatus, board]);
 
+  const handleUndo = () => {
+    setHistory(h => {
+      const prev = h[h.length - 1];
+      if (!prev) return h;
+      setBoard(prev.board);
+      setGameStatus(prev.gameStatus);
+      setCurrentPlayer('red');
+      setSelectedPos(null);
+      setValidMoves([]);
+      setIsThinking(false);
+      return h.slice(0, -1);
+    });
+  };
+
   const handleRestart = () => {
     setBoard(createInitialBoard());
     setSelectedPos(null);
@@ -82,6 +103,7 @@ export default function App() {
     setCurrentPlayer('red');
     setGameStatus('playing');
     setIsThinking(false);
+    setHistory([]);
   };
 
   const pieces = countPieces(board);
@@ -128,9 +150,18 @@ export default function App() {
         ))}
       </div>
 
-      <button className="restart-btn" onClick={handleRestart}>
-        🔄 New Game
-      </button>
+      <div className="action-buttons">
+        <button
+          className="undo-btn"
+          onClick={handleUndo}
+          disabled={history.length === 0 || isThinking}
+        >
+          ↩ Undo
+        </button>
+        <button className="restart-btn" onClick={handleRestart}>
+          🔄 New Game
+        </button>
+      </div>
 
       <p className="rules-hint">
         Red moves up · Black moves down · Click a piece, then click its destination · Jumps are mandatory

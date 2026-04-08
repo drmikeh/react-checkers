@@ -216,18 +216,27 @@
 }
 
 /* Buttons and hints */
-.restart-btn {
+.action-buttons {
+  display: flex;
+  gap: 12px;
   margin-top: 20px;
+}
+
+.restart-btn,
+.undo-btn {
   padding: 10px 32px;
   font-size: 1rem;
   font-family: var(--sans);
-  background: #5c3417;
-  color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.restart-btn {
+  background: #5c3417;
+  color: #fff;
 }
 
 .restart-btn:hover {
@@ -237,6 +246,26 @@
 
 .restart-btn:active {
   transform: translateY(0);
+}
+
+.undo-btn {
+  background: #3a5a8a;
+  color: #fff;
+}
+
+.undo-btn:hover:not(:disabled) {
+  background: #4a6fa0;
+  transform: translateY(-1px);
+}
+
+.undo-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.undo-btn:disabled {
+  background: #8a9ab0;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .rules-hint {

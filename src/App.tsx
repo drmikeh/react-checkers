@@ -1,4 +1,4 @@
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, useState } from 'react';
 import { countPieces } from './gameLogic';
 import { getBestMove } from './ai';
 import { gameReducer, initialState } from './reducer';
@@ -8,6 +8,7 @@ import './App.css';
 export default function App() {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const { board, selectedPos, validMoves, currentPlayer, gameStatus, isThinking, history } = state;
+  const [depth, setDepth] = useState(5);
 
   useEffect(() => {
     if (gameStatus !== 'playing' || currentPlayer !== 'black') return;
@@ -15,12 +16,12 @@ export default function App() {
     dispatch({ type: 'AI_START_THINKING' });
 
     const timer = setTimeout(() => {
-      const bestMove = getBestMove(board, 5);
+      const bestMove = getBestMove(board, depth);
       if (bestMove) dispatch({ type: 'AI_MOVE', move: bestMove });
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [currentPlayer, gameStatus, board]);
+  }, [currentPlayer, gameStatus, board, depth]);
 
   const pieces = countPieces(board);
 
@@ -77,6 +78,26 @@ export default function App() {
         <button className="restart-btn" onClick={() => dispatch({ type: 'RESTART' })}>
           🔄 New Game
         </button>
+      </div>
+
+      <div className="depth-control">
+        <label htmlFor="depth-slider" className="depth-label">
+          AI Difficulty — Depth: <span className="depth-value">{depth}</span>
+        </label>
+        <input
+          id="depth-slider"
+          type="range"
+          min={1}
+          max={7}
+          value={depth}
+          onChange={e => setDepth(Number(e.target.value))}
+          disabled={isThinking}
+          className="depth-slider"
+        />
+        <div className="depth-hints">
+          <span>Easy</span>
+          <span>Hard</span>
+        </div>
       </div>
 
       <p className="rules-hint">

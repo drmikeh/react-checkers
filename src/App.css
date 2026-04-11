@@ -6,6 +6,38 @@
   min-height: 100vh;
 }
 
+.game-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.board-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+  width: 280px;
+}
+
+@media (max-width: 900px) {
+  .game-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .side-panel {
+    width: 100%;
+    max-width: calc(44px * 8);
+  }
+}
+
 .game-title {
   font-size: 2.2rem !important;
   font-weight: 700 !important;
@@ -17,10 +49,12 @@
 /* Scoreboard */
 .scoreboard {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
   margin-bottom: 12px;
   font-size: 0.95rem;
+  width: 100%;
 }
 
 .score-card {
@@ -30,7 +64,7 @@
   gap: 2px;
   padding: 8px 20px;
   border-radius: 8px;
-  min-width: 130px;
+  width: 100%;
 }
 
 .score-card.player {
@@ -62,13 +96,15 @@
 
 /* Status bar */
 .status-bar {
-  height: 36px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   font-size: 1rem;
   margin-bottom: 12px;
   color: var(--text-h);
+  width: 100%;
 }
 
 .winner-text {
@@ -220,6 +256,8 @@
   display: flex;
   gap: 12px;
   margin-top: 20px;
+  width: 100%;
+  justify-content: center;
 }
 
 .restart-btn,
@@ -274,7 +312,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 20px;
-  width: 280px;
+  width: 100%;
 }
 
 .depth-label {

@@ -25,12 +25,12 @@ export default function App() {
   const pieces = countPieces(board);
 
   return (
-    <div className="flex flex-col items-center px-4 pt-6 pb-10 min-h-screen">
+    <div className="flex flex-col items-center px-4 pt-6 pb-10 min-h-screen bg-white dark:bg-[#16171d]">
       <h1 className="text-4xl font-bold tracking-tight mb-4 text-gray-900 dark:text-gray-100">
         ♟ Checkers
       </h1>
 
-      <div className="flex flex-col items-start gap-10 md:flex-row">
+      <div className="flex flex-col items-start gap-10 min-[900px]:flex-row">
 
         {/* Board column — board-wrapper sets --sq for both the grid and labels */}
         <div className="board-wrapper flex flex-col items-center">

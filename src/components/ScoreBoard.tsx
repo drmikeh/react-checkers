@@ -13,7 +13,7 @@ export function ScoreBoard({ red, redKings, black, blackKings }: ScoreBoardProps
   const kingLabel = (kings: number) => kings > 0 ? ` · ${kings} 👑` : '';
 
   return (
-    <Stack spacing={1} width="100%">
+    <Stack spacing={1} sx={{ width: '100%' }}>
       <Paper
         elevation={0}
         sx={{
@@ -24,7 +24,7 @@ export function ScoreBoard({ red, redKings, black, blackKings }: ScoreBoardProps
           borderRadius: 2,
         }}
       >
-        <Typography variant="subtitle2" fontWeight={600} color="error.light">
+        <Typography variant="subtitle2" sx={{ fontWeight: 600 }} color="error.light">
           You (Red)
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -32,7 +32,7 @@ export function ScoreBoard({ red, redKings, black, blackKings }: ScoreBoardProps
         </Typography>
       </Paper>
 
-      <Typography variant="body2" color="text.secondary" textAlign="center">
+      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
         vs
       </Typography>
 
@@ -46,7 +46,7 @@ export function ScoreBoard({ red, redKings, black, blackKings }: ScoreBoardProps
           borderRadius: 2,
         }}
       >
-        <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+        <Typography variant="subtitle2" sx={{ fontWeight: 600 }} color="text.primary">
           Computer (Black)
         </Typography>
         <Typography variant="body2" color="text.secondary">

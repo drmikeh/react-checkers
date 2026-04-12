@@ -18,12 +18,13 @@ export function DepthControl({ depth, onChange, disabled }: DepthControlProps) {
         </Box>
       </Typography>
       <Slider
+        aria-label="AI search depth"
         value={depth}
         min={1}
         max={7}
         step={1}
         disabled={disabled}
-        onChange={(_, value) => onChange(value as number)}
+        onChange={(_, value) => onChange(value as number /* single slider, never array */)}
         sx={{ color: 'primary.main' }}
       />
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>

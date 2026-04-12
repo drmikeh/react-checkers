@@ -32,9 +32,15 @@ export function StatusBar({ gameStatus, currentPlayer, isThinking }: StatusBarPr
     );
   }
 
-  return (
-    <Alert severity="info" sx={{ width: '100%', borderRadius: 2 }}>
-      🔴 Your turn — click a piece to move
-    </Alert>
-  );
+  if (currentPlayer === 'red') {
+    return (
+      <Alert severity="info" sx={{ width: '100%', borderRadius: 2 }}>
+        🔴 Your turn — click a piece to move
+      </Alert>
+    );
+  }
+
+  // Exhaustive fallback — GameStatus is currently a 3-value union but this guards
+  // against future additions (e.g. 'draw') reaching this component unhandled.
+  return null;
 }

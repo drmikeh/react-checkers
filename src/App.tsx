@@ -1,9 +1,15 @@
 import { useReducer, useEffect, useState } from 'react';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import { countPieces } from './gameLogic';
 import { getBestMove } from './ai';
 import { gameReducer, initialState } from './reducer';
 import { Board } from './components/Board';
-import './App.css';
+import { ScoreBoard } from './components/ScoreBoard';
+import { StatusBar } from './components/StatusBar';
+import { DepthControl } from './components/DepthControl';
 
 export default function App() {
   const [state, dispatch] = useReducer(gameReducer, initialState);
@@ -26,10 +32,18 @@ export default function App() {
   const pieces = countPieces(board);
 
   return (
-    <div className="app">
-      <h1 className="game-title">♟ Checkers</h1>
-      <div className="game-layout">
-        <div className="board-column">
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3, minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.5px', mb: 2 }}>
+        ♟ Checkers
+      </Typography>
+
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={5}
+        sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}
+      >
+        {/* Board column */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Board
             board={board}
             selectedPos={selectedPos}
@@ -37,76 +51,59 @@ export default function App() {
             onSquareClick={pos => dispatch({ type: 'SQUARE_CLICK', pos })}
             disabled={gameStatus !== 'playing' || currentPlayer !== 'red' || isThinking}
           />
-          <div className="board-labels">
+          <Box sx={{ display: 'flex', width: { xs: 'calc(44px * 8)', sm: 'calc(68px * 8)' }, justifyContent: 'space-around', mt: 0.5 }}>
             {['a','b','c','d','e','f','g','h'].map(l => (
-              <span key={l} className="col-label">{l}</span>
+              <Typography key={l} variant="caption" color="text.disabled" sx={{ width: { xs: '44px', sm: '68px' }, textAlign: 'center' }}>
+                {l}
+              </Typography>
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        <div className="side-panel">
-          <div className="scoreboard">
-            <div className="score-card player">
-              <span className="score-label">You (Red)</span>
-              <span className="score-pieces">{pieces.red} pieces {pieces.redKings > 0 ? `· ${pieces.redKings} 👑` : ''}</span>
-            </div>
-            <div className="score-divider">vs</div>
-            <div className="score-card computer">
-              <span className="score-label">Computer (Black)</span>
-              <span className="score-pieces">{pieces.black} pieces {pieces.blackKings > 0 ? `· ${pieces.blackKings} 👑` : ''}</span>
-            </div>
-          </div>
+        {/* Side panel */}
+        <Stack spacing={2} sx={{ width: 280, pt: 1 }}>
+          <ScoreBoard
+            red={pieces.red}
+            redKings={pieces.redKings}
+            black={pieces.black}
+            blackKings={pieces.blackKings}
+          />
 
-          <div className="status-bar">
-            {gameStatus === 'playing' ? (
-              currentPlayer === 'red'
-                ? <span>🔴 Your turn — click a piece to move</span>
-                : <span>{isThinking ? '⚫ Computer is thinking…' : '⚫ Computer\'s turn'}</span>
-            ) : (
-              <span className="winner-text">
-                {gameStatus === 'red_wins' ? '🎉 You win! Congratulations!' : '😔 Computer wins! Better luck next time.'}
-              </span>
-            )}
-          </div>
+          <StatusBar
+            gameStatus={gameStatus}
+            currentPlayer={currentPlayer}
+            isThinking={isThinking}
+          />
 
-          <div className="action-buttons">
-            <button
-              className="undo-btn"
+          <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              color="primary"
               onClick={() => dispatch({ type: 'UNDO' })}
               disabled={history.length === 0 || isThinking}
             >
               ↩ Undo
-            </button>
-            <button className="restart-btn" onClick={() => dispatch({ type: 'RESTART' })}>
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => dispatch({ type: 'RESTART' })}
+            >
               🔄 New Game
-            </button>
-          </div>
+            </Button>
+          </Stack>
 
-          <div className="depth-control">
-            <label htmlFor="depth-slider" className="depth-label">
-              AI Difficulty — Depth: <span className="depth-value">{depth}</span>
-            </label>
-            <input
-              id="depth-slider"
-              type="range"
-              min={1}
-              max={7}
-              value={depth}
-              onChange={e => setDepth(Number(e.target.value))}
-              disabled={isThinking}
-              className="depth-slider"
-            />
-            <div className="depth-hints">
-              <span>Easy</span>
-              <span>Hard</span>
-            </div>
-          </div>
+          <DepthControl
+            depth={depth}
+            onChange={setDepth}
+            disabled={isThinking}
+          />
 
-          <p className="rules-hint">
+          <Typography variant="caption" color="text.disabled" sx={{ textAlign: 'center' }}>
             Red moves up · Black moves down · Click a piece, then click its destination · Jumps are mandatory
-          </p>
-        </div>
-      </div>
-    </div>
+          </Typography>
+        </Stack>
+      </Stack>
+    </Box>
   );
 }

@@ -17,15 +17,16 @@ There is no test suite.
 
 All game logic is pure functions (no side effects) living outside React:
 
-| File | Responsibility |
-|------|---------------|
-| `src/types.ts` | Shared types: `Board`, `Piece`, `Player`, `Move`, `Position`, `GameStatus` |
-| `src/gameLogic.ts` | Move generation, jump chaining, board mutation, game status |
-| `src/ai.ts` | Minimax with alpha-beta pruning (`getBestMove`) |
-| `src/components/Board.tsx` | Pure presentational 8×8 grid component |
-| `src/App.tsx` | All React state; orchestrates player input and AI turns |
+| File                       | Responsibility                                                             |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `src/types.ts`             | Shared types: `Board`, `Piece`, `Player`, `Move`, `Position`, `GameStatus` |
+| `src/gameLogic.ts`         | Move generation, jump chaining, board mutation, game status                |
+| `src/ai.ts`                | Minimax with alpha-beta pruning (`getBestMove`)                            |
+| `src/components/Board.tsx` | Pure presentational 8×8 grid component                                     |
+| `src/App.tsx`              | All React state; orchestrates player input and AI turns                    |
 
 **Data flow:**
+
 1. `App.tsx` holds all mutable state (`board`, `currentPlayer`, `selectedPos`, `validMoves`, `gameStatus`, `isThinking`).
 2. On the human's turn, clicks route through `handleSquareClick` → `getValidMovesForPiece` → `applyMove`.
 3. On the AI's turn, a `useEffect` fires `getBestMove` inside a `setTimeout(400ms)` to give the UI time to update, then calls `applyMove`.

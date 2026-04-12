@@ -49,7 +49,7 @@ export default function App() {
         </div>
 
         {/* Side panel */}
-        <div className="flex flex-col items-center pt-2 w-full md:w-72">
+        <div className="flex flex-col items-center pt-2 w-full min-[900px]:w-72">
 
           {/* Scoreboard */}
           <div className="flex flex-col gap-2 mb-3 w-full text-sm">

@@ -1,14 +1,16 @@
-import { useReducer, useEffect, useState } from 'react';
+import { useReducer, useEffect, useRef, useState } from 'react';
 import { countPieces } from './gameLogic';
 import { getBestMove } from './ai';
 import { gameReducer, initialState } from './reducer';
 import { Board } from './components/Board';
+import { isMuted, setMuted, playMoveSound, playCaptureSound, playGameOverSound } from './sounds';
 import './App.css';
 
 export default function App() {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const { board, selectedPos, validMoves, currentPlayer, gameStatus, isThinking, history } = state;
   const [depth, setDepth] = useState(5);
+  const [muted, setMutedState] = useState(isMuted);
 
   useEffect(() => {
     if (gameStatus !== 'playing' || currentPlayer !== 'black') return;
@@ -22,6 +24,43 @@ export default function App() {
 
     return () => clearTimeout(timer);
   }, [currentPlayer, gameStatus, board, depth]);
+
+  const prevBoardRef = useRef(board);
+  const prevGameStatusRef = useRef(gameStatus);
+  const skipNextSoundRef = useRef(true);
+
+  useEffect(() => {
+    const prevBoard = prevBoardRef.current;
+    const prevGameStatus = prevGameStatusRef.current;
+    prevBoardRef.current = board;
+    prevGameStatusRef.current = gameStatus;
+
+    if (skipNextSoundRef.current) {
+      skipNextSoundRef.current = false;
+      return;
+    }
+    if (prevBoard === board) return;
+
+    if (prevGameStatus === 'playing' && gameStatus !== 'playing') {
+      playGameOverSound(gameStatus === 'red_wins');
+      return;
+    }
+
+    const prevCount = countPieces(prevBoard);
+    const newCount = countPieces(board);
+    const captured = prevCount.red + prevCount.black > newCount.red + newCount.black;
+    if (captured) {
+      playCaptureSound();
+    } else {
+      playMoveSound();
+    }
+  }, [board, gameStatus]);
+
+  const toggleMuted = () => {
+    const next = !muted;
+    setMuted(next);
+    setMutedState(next);
+  };
 
   const pieces = countPieces(board);
 
@@ -72,13 +111,30 @@ export default function App() {
           <div className="action-buttons">
             <button
               className="undo-btn"
-              onClick={() => dispatch({ type: 'UNDO' })}
+              onClick={() => {
+                skipNextSoundRef.current = true;
+                dispatch({ type: 'UNDO' });
+              }}
               disabled={history.length === 0 || isThinking}
             >
               ↩ Undo
             </button>
-            <button className="restart-btn" onClick={() => dispatch({ type: 'RESTART' })}>
+            <button
+              className="restart-btn"
+              onClick={() => {
+                skipNextSoundRef.current = true;
+                dispatch({ type: 'RESTART' });
+              }}
+            >
               🔄 New Game
+            </button>
+            <button
+              className="mute-btn"
+              onClick={toggleMuted}
+              aria-label={muted ? 'Unmute sound' : 'Mute sound'}
+              title={muted ? 'Unmute sound' : 'Mute sound'}
+            >
+              {muted ? '🔇' : '🔊'}
             </button>
           </div>
 
